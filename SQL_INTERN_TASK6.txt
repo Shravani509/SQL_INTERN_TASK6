@@ -1,0 +1,85 @@
+SPOOL C:\Users\SHRAVANI\Documents\task6output.txt;
+
+
+CREATE TABLE departments (
+    department_id INT PRIMARY KEY,
+    department_name VARCHAR(50),
+    manager_id INT  -- refers to employee_id from employees table
+);
+
+CREATE TABLE employees (
+    employee_id INT PRIMARY KEY,
+    name VARCHAR(50),
+    department_id INT,
+    salary DECIMAL(10, 2),
+    manager_id INT,  -- refers to employee_id of their manager
+    FOREIGN KEY (department_id) REFERENCES departments(department_id)
+);
+
+-- Insert into departments
+INSERT INTO departments (department_id, department_name, manager_id) VALUES(1, 'HR', 101);
+INSERT INTO departments (department_id, department_name, manager_id) VALUES(2, 'Finance',102);
+INSERT INTO departments (department_id, department_name, manager_id) VALUES(3, 'IT', NULL);
+
+-- Insert into employees
+INSERT INTO employees (employee_id, name, department_id, salary, manager_id) VALUES(101, 'Alice', 1, 60000, NULL);
+    -- Manager of HR
+INSERT INTO employees (employee_id, name, department_id, salary, manager_id) VALUES(102, 'Bob', 2, 75000, NULL);
+    -- Manager of Finance
+INSERT INTO employees (employee_id, name, department_id, salary, manager_id) VALUES(103, 'Charlie', 1, 40000, 101);
+INSERT INTO employees (employee_id, name, department_id, salary, manager_id) VALUES(104, 'David', 1, 42000, 101);
+INSERT INTO employees (employee_id, name, department_id, salary, manager_id) VALUES(105, 'Eve', 2, 50000, 102);
+INSERT INTO employees (employee_id, name, department_id, salary, manager_id) VALUES(106, 'Frank', 3, 55000, NULL);
+
+✅ 1. Scalar Subquery
+A scalar subquery returns a single value (one row and one column).
+
+Example: Find employees who earn more than the average salary.
+
+SELECT name, salary
+FROM employees
+WHERE salary > (
+    SELECT AVG(salary)
+    FROM employees
+);
+
+✅ 2. Correlated Subquery
+A correlated subquery refers to a column from the outer query. It is executed for each row in the outer query.
+
+Example: Find employees whose salary is greater than the average salary of their department.
+
+SELECT name, department_id, salary
+FROM employees e
+WHERE salary > (
+    SELECT AVG(salary)
+    FROM employees
+    WHERE department_id = e.department_id
+);
+
+✅ 3. Subquery with IN
+Used to check if a value matches any value in a list returned by a subquery.
+
+Example: Find employees who work in departments that have at least one manager.
+
+SELECT name
+FROM employees
+WHERE department_id IN (
+    SELECT department_id
+    FROM departments
+    WHERE manager_id IS NOT NULL
+);
+
+✅ 4. Subquery with EXISTS
+Checks if the subquery returns any row. Used for existence checking.
+
+Example: Find employees who have at least one subordinate.
+
+SELECT name
+FROM employees e
+WHERE EXISTS (
+    SELECT 1
+    FROM employees sub
+    WHERE sub.manager_id = e.employee_id
+);
+
+SPOOL OFF

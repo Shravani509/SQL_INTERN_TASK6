@@ -1,0 +1,113 @@
+SQL> CREATE TABLE departments (
+  2      department_id INT PRIMARY KEY,
+  3      department_name VARCHAR(50),
+  4      manager_id INT  -- refers to employee_id from employees table
+  5  );
+
+Table created.
+
+SQL> CREATE TABLE employees (
+  2      employee_id INT PRIMARY KEY,
+  3      name VARCHAR(50),
+  4      department_id INT,
+  5      salary DECIMAL(10, 2),
+  6      manager_id INT,  -- refers to employee_id of their manager
+  7      FOREIGN KEY (department_id) REFERENCES departments(department_id)
+  8  );
+
+Table created.
+
+SQL> INSERT INTO departments (department_id, department_name, manager_id) VALUES(1, 'HR', 101);
+
+1 row created.
+
+SQL> INSERT INTO departments (department_id, department_name, manager_id) VALUES(2, 'Finance',102);
+
+1 row created.
+
+SQL> INSERT INTO departments (department_id, department_name, manager_id) VALUES(3, 'IT', NULL);
+
+1 row created.
+
+SQL> INSERT INTO employees (employee_id, name, department_id, salary, manager_id) VALUES(101, 'Alice', 1, 60000, NULL);
+
+1 row created.
+
+SQL> INSERT INTO employees (employee_id, name, department_id, salary, manager_id) VALUES(102, 'Bob', 2, 75000, NULL);
+
+1 row created.
+
+SQL> INSERT INTO employees (employee_id, name, department_id, salary, manager_id) VALUES(103, 'Charlie', 1, 40000, 101);
+
+1 row created.
+
+SQL> INSERT INTO employees (employee_id, name, department_id, salary, manager_id) VALUES(104, 'David', 1, 42000, 101);
+
+1 row created.
+
+SQL> INSERT INTO employees (employee_id, name, department_id, salary, manager_id) VALUES(105, 'Eve', 2, 50000, 102);
+
+1 row created.
+
+SQL> INSERT INTO employees (employee_id, name, department_id, salary, manager_id) VALUES(106, 'Frank', 3, 55000, NULL);
+
+1 row created.
+
+SQL> SELECT name, salary
+  2  FROM employees
+  3  WHERE salary > (
+  4      SELECT AVG(salary)
+  5      FROM employees
+  6  );
+
+NAME                                                   SALARY                   
+-------------------------------------------------- ----------                   
+Alice                                                   60000                   
+Bob                                                     75000                   
+Frank                                                   55000                   
+
+SQL> 
+SQL> SELECT name, department_id, salary
+  2  FROM employees e
+  3  WHERE salary > (
+  4      SELECT AVG(salary)
+  5      FROM employees
+  6      WHERE department_id = e.department_id
+  7  );
+
+NAME                                               DEPARTMENT_ID     SALARY     
+-------------------------------------------------- ------------- ----------     
+Alice                                                          1      60000     
+Bob                                                            2      75000     
+
+SQL> SELECT name
+  2  FROM employees
+  3  WHERE department_id IN (
+  4      SELECT department_id
+  5      FROM departments
+  6      WHERE manager_id IS NOT NULL
+  7  );
+
+NAME                                                                            
+--------------------------------------------------                              
+Alice                                                                           
+Bob                                                                             
+Charlie                                                                         
+David                                                                           
+Eve                                                                             
+
+SQL> SELECT name
+  2  FROM employees e
+  3  WHERE EXISTS (
+  4      SELECT 1
+  5      FROM employees sub
+  6      WHERE sub.manager_id = e.employee_id
+  7  );
+
+NAME                                                                            
+--------------------------------------------------                              
+Alice                                                                           
+Bob                                                                             
+
+SQL> 
+SQL> SPOOL OFF
